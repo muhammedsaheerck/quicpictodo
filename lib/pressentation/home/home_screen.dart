@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:quicpictodo/core/router.dart';
+import 'package:quicpictodo/infrastructure/todo_repository.dart';
 import 'package:quicpictodo/pressentation/widgets/common_widgets.dart';
 
 import '../../application/todo_provider.dart';
@@ -15,18 +16,33 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  late HiveDataStore _taskService;
   @override
   void initState() {
     super.initState();
-
+    _taskService = HiveDataStore();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TodoProvider>().getAllTasks();
+    });
+    _listenToNotifications();
+  }
+
+  void _listenToNotifications() {
+    _taskService.notificationStream.listen((task) {
+      _scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text('Task "${task.title}" is due soon!'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldMessengerKey,
       backgroundColor: AppConstants.mainColor,
       appBar: AppBar(
         backgroundColor: AppConstants.mainColor,

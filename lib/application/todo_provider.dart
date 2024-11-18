@@ -62,7 +62,7 @@ class TodoProvider extends ChangeNotifier {
       var task = Task.create(
           title: titleController.text,
           description: descriptionController.text,
-          dueDate: dueDate);
+          dueDate: selectedDateTime);
 
       await hiveDataStore.addTask(task: task);
       log("message 0");
